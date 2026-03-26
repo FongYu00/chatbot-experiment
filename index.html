@@ -180,15 +180,14 @@ function handleSubmit() {
     const message = userInput.value.trim();
     if (!message) return;
 
-    fetch("https://script.google.com/macros/s/AKfycbyyzrPP_8n0qj8DgjHb20RAt271sqGD-Ig72batyYAZpW6yHSbkbT3mltF3zgPVjnRr9g/exec", {
-        method: "POST",
-        headers: {
-        "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-        question: message
-        })
-    });
+    fetch("https://script.google.com/macros/s/AKfycbwciNBA4kql1iNQENqsKEUKGToqkcocQyCRAeoHVk__ATC2vnd_drtreQu-0xr0WECAAQ/exec", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question: message })
+    })
+    .then(res => res.text())
+    .then(txt => console.log("서버 응답:", txt))
+    .catch(err => console.error("전송 실패:", err));
 
 
     addMessage(message, "user");
