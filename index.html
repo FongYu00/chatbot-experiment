@@ -174,11 +174,22 @@ function getKeywordAnswer(message) {
 }
 
 /* 메시지 처리 */
-const delayInSeconds = 13;
+const delayInSeconds = 3;
 
 function handleSubmit() {
     const message = userInput.value.trim();
     if (!message) return;
+
+    fetch("https://script.google.com/macros/s/AKfycbyyzrPP_8n0qj8DgjHb20RAt271sqGD-Ig72batyYAZpW6yHSbkbT3mltF3zgPVjnRr9g/exec", {
+        method: "POST",
+        headers: {
+        "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+        question: message
+        })
+    });
+
 
     addMessage(message, "user");
     userInput.value = "";
