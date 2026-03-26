@@ -189,7 +189,6 @@ function handleSubmit() {
     .then(txt => console.log("서버 응답:", txt))
     .catch(err => console.error("전송 실패:", err));
 
-
     addMessage(message, "user");
     userInput.value = "";
 
