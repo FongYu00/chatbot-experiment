@@ -180,7 +180,7 @@ function handleSubmit() {
     const message = userInput.value.trim();
     if (!message) return;
 
-    fetch("https://script.google.com/macros/s/AKfycbwVeMGqhtlyPjPuIZwmG7kWw75fELp0corsYo0Jqsf-T27oZbV20kp72IHmcitsO0fasQ/exec", {
+    fetch("https://script.google.com/macros/s/AKfycbznBZh-NyRkiECHowfPK-GRsmvhWLQUJkae3SpWvyuF53KfQ2F5DcN0edu7ujrcfM-XkA/exec", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ question: message })
