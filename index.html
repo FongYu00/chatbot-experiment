@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keyword-Based Chatbot</title>
+
+    <!-- ===============================
+         CSS (기존 chatbot.css 통합)
+    ================================ -->
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background-color: #f5f7fa;
+            font-family: 'Segoe UI', sans-serif;
+            color: #000000;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            padding: 20px;
+        }
+
+        .chatbox {
+            display: flex;
+            flex-direction: column;
+            width: 90%;
+            max-width: 700px;
+            height: 100%;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            border: 1px solid #ddd;
+        }
+
+        .chat-display {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: #ffffff;
+            font-size: 25px;
+            line-height: 1.5;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-message {
+            max-width: 90%;
+            padding: 12px 16px;
+            margin: 8px;
+            border-radius: 16px;
+            position: relative;
+            word-break: break-word;
+            white-space: pre-wrap;
+            line-height: 1.55;
+        }
+
+        .chat-message.user {
+            align-self: flex-end;
+            background-color: #d0e8ff;
+            color: #000000;
+            margin-left: auto;
+            border-bottom-right-radius: 4px;
+        }
+
+        .chat-message.bot {
+            align-self: flex-start;
+            background-color: #d6f7da;
+            color: #000000;
+            margin-right: auto;
+            border-bottom-left-radius: 4px;
+        }
+
+        .input-area {
+            display: flex;
+            border-top: 1px solid #ddd;
+            background-color: #ffffff;
+        }
+
+        .input-area input {
+            flex-grow: 1;
+            padding: 35px;
+            border: none;
+            background-color: #f2f2f2;
+            color: #000000;
+            font-size: 25px;
+            outline: none;
+            border-top-left-radius: 10px;
+            border-bottom-left-radius: 10px;
+        }
+
+        .input-area button {
+            padding: 15px 25px;
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            border-top-right-radius: 10px;
+            border-bottom-right-radius: 10px;
+            transition: background-color 0.3s;
+        }
+
+        .input-area button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+    <div class="chatbox">
+        <div class="chat-display" id="chatDisplay"></div>
+
+        <div class="input-area">
+            <input type="text" id="userInput" placeholder="무엇이든 물어보세요."
+                   autocomplete="off" autocorrect="off"
+                   autocapitalize="off" spellcheck="false">
+            <button onclick="handleSubmit()">보내기</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===============================
+     JavaScript
+================================ -->
+<script>
+const chatDisplay = document.getElementById("chatDisplay");
+const userInput = document.getElementById("userInput");
+
+/* 키워드 기반 응답 데이터 */
+const responses = [
+    {
+        keywords: ["청년", "정치", "무관심", "합리적"],
+        answer:
+        "<strong>🌟 핵심 제안</strong><br><br>"
+        + "청년층의 정치적 무관심을 줄이려면, 정치가 멀리 있는 것이 아니라 "
+        + "<strong>일상과 직접적으로 연결된 경험</strong>으로 다가오도록 설계해야 합니다.<br><br>"
+
+        + "<strong>🏙 생활과 맞닿은 참여 통로</strong><br><br>"
+        + " • 청년들이 자주 사용하는 앱에서 교통, 주거, 아르바이트 환경 등 생활 문제와 연결된 "
+        + "<strong>정책 제안 투표</strong> 제공<br><br>"
+
+        + "<strong>🎮 체험 기반의 학습</strong><br><br>"
+        + " • 가상의 예산 배분이나 지역 문제 해결을 설계하는 "
+        + "<strong>정책 시뮬레이션</strong> 운영<br><br>"
+
+        + "<strong>🌱 작은 변화를 직접 경험</strong><br><br>"
+        + " • 청년 의견을 반영한 작은 지역 프로젝트 실행<br><br>"
+
+        + "✅ 체험형 설계를 통해 정치 참여를 자연스럽게 유도할 수 있습니다."
+    }
+];
+
+/* 키워드 매칭 함수 */
+function getKeywordAnswer(message) {
+    for (const item of responses) {
+        let matchCount = 0;
+        for (const keyword of item.keywords) {
+            if (message.includes(keyword)) matchCount++;
+        }
+        if (matchCount >= 2) return item.answer;
+    }
+    return "죄송해요, 무슨 말인지 잘 모르겠어요.";
+}
+
+/* 메시지 처리 */
+const delayInSeconds = 13;
+
+function handleSubmit() {
+    const message = userInput.value.trim();
+    if (!message) return;
+
+    addMessage(message, "user");
+    userInput.value = "";
+
+    const loading = document.createElement("div");
+    loading.className = "chat-message bot";
+    loading.textContent = "⏳ 잠시만 기다려 주세요...";
+    chatDisplay.appendChild(loading);
+    chatDisplay.scrollTop = chatDisplay.scrollHeight;
+
+    setTimeout(() => {
+        chatDisplay.removeChild(loading);
+        typeMessage(getKeywordAnswer(message), "bot");
+    }, delayInSeconds * 1000);
+}
+
+function addMessage(text, sender) {
+    const msg = document.createElement("div");
+    msg.className = `chat-message ${sender}`;
+    msg.innerHTML = text;
+    chatDisplay.appendChild(msg);
+    chatDisplay.scrollTop = chatDisplay.scrollHeight;
+}
+
+function typeMessage(text, sender) {
+    const msg = document.createElement("div");
+    msg.className = `chat-message ${sender}`;
+    chatDisplay.appendChild(msg);
+
+    let i = 0, buffer = "";
+    const typing = setInterval(() => {
+        if (text[i] === "<") {
+            const end = text.indexOf(">", i);
+            buffer += text.slice(i, end + 1);
+            i = end + 1;
+        } else {
+            buffer += text[i++];
+        }
+        msg.innerHTML = buffer;
+        chatDisplay.scrollTop = chatDisplay.scrollHeight;
+        if (i >= text.length) clearInterval(typing);
+    }, 20);
+}
+
+userInput.addEventListener("keypress", e => {
+    if (e.key === "Enter") handleSubmit();
+});
+
+/* 초기 메시지 */
+addMessage("안녕하세요! 무엇을 도와드릴까요?", "bot");
+</script>
+</body>
+</html>
