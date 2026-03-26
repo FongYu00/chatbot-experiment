@@ -182,12 +182,14 @@ function handleSubmit() {
 
     fetch("https://script.google.com/macros/s/AKfycbzQPHFQWSVyj-0mJ03t_fzn1RkKLefg1ONNS1zGlyOSXfGH1YvfeAtOQYVLNR9xaaoZmw/exec", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ question: message })
-    })
-    .then(res => res.text())
-    .then(txt => console.log("서버 응답:", txt))
-    .catch(err => console.error("전송 실패:", err));
+      mode: "no-cors",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        question: message
+      })
+    });
 
     addMessage(message, "user");
     userInput.value = "";
