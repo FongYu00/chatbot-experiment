@@ -234,6 +234,16 @@ function typeMessage(text, sender) {
     }, 20);
 }
 
+function getOrCreateParticipantId() {
+  let pid = localStorage.getItem("participant_id");
+  if (!pid) {
+    pid = "P_" + crypto.randomUUID();
+    localStorage.setItem("participant_id", pid);
+  }
+  return pid;
+}
+
+const participantId = getOrCreateParticipantId();
 userInput.addEventListener("keypress", e => {
     if (e.key === "Enter") handleSubmit();
 });
