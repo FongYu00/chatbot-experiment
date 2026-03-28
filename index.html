@@ -187,7 +187,8 @@ function handleSubmit() {
         "Content-Type": "text/plain"
       },
       body: JSON.stringify({
-        question: message
+          participant_id: participantId,
+          question: message
       })
     });
 
@@ -244,6 +245,7 @@ function getOrCreateParticipantId() {
 }
 
 const participantId = getOrCreateParticipantId();
+console.log("참가자 ID:", participantId);
 userInput.addEventListener("keypress", e => {
     if (e.key === "Enter") handleSubmit();
 });
