@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keyword-Based Chatbot</title>
+
+    <!-- ===============================
+         CSS (기존 chatbot.css 통합)
+    ================================ -->
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background-color: #f5f7fa;
+            font-family: 'Segoe UI', sans-serif;
+            color: #000000;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            padding: 20px;
+        }
+
+        .chatbox {
+            display: flex;
+            flex-direction: column;
+            width: 95%;
+            max-width: 1100px;
+            height: 100%;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            border: 1px solid #ddd;
+        }
+
+        .chat-display {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: #ffffff;
+            font-size: 16px;
+            line-height: 1.5;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-message {
+            max-width: 90%;
+            padding: 12px 16px;
+            margin: 8px;
+            border-radius: 16px;
+            position: relative;
+            word-break: break-word;
+            white-space: pre-wrap;
+            line-height: 1.55;
+        }
+
+        .chat-message.user {
+            align-self: flex-end;
+            background-color: #d0e8ff;
+            color: #000000;
+            margin-left: auto;
+            border-bottom-right-radius: 4px;
+        }
+
+        .chat-message.bot {
+            align-self: flex-start;
+            background-color: #d6f7da;
+            color: #000000;
+            margin-right: auto;
+            border-bottom-left-radius: 4px;
+        }
+
+        .input-area {
+            display: flex;
+            border-top: 1px solid #ddd;
+            background-color: #ffffff;
+        }
+
+        .input-area input {
+            flex-grow: 1;
+            padding: 35px;
+            border: none;
+            background-color: #f2f2f2;
+            color: #000000;
+            font-size: 16px;
+            outline: none;
+            border-top-left-radius: 10px;
+            border-bottom-left-radius: 10px;
+        }
+
+        .input-area button {
+            padding: 15px 25px;
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            border-top-right-radius: 10px;
+            border-bottom-right-radius: 10px;
+            transition: background-color 0.3s;
+        }
+
+        .input-area button:hover {
+            background-color: #45a049;
+        }
+
+        .paragraph-divider {
+            border: none;
+            border-top: 1px solid #7c7c7c;
+            margin: 24px 0;
+        }
+
+    </style>
+</head>
+
+<body>
+<div class="container">
+    <div class="chatbox">
+        <div class="chat-display" id="chatDisplay"></div>
+
+        <div class="input-area">
+            <input type="text" id="userInput" placeholder="무엇이든 물어보세요."
+                   autocomplete="off" autocorrect="off"
+                   autocapitalize="off" spellcheck="false">
+            <button onclick="handleSubmit()">보내기</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===============================
+     JavaScript
+================================ -->
+<script>
+const chatDisplay = document.getElementById("chatDisplay");
+const userInput = document.getElementById("userInput");
+
+/* 키워드 기반 응답 데이터 */
+const responses = [
+        
+    {
+        keywords: ["봄", "시", "짧은", "만들어"],
+        answer:
+        "연둣빛 숨이<br>"
+        + "창가에 먼저 도착해<br>"
+        + "겨우내 굳은 공기를 풀어놓는다<br><br>"
+        + "느슨해진 햇살 아래<br>"
+        + "외투를 벗은 시간들이<br>"
+        + "천천히 걸음을 배우고<br><br>"
+        + "아직 말수 적은 꽃은 하나,<br>"
+        + "오늘의 온도를<br>"
+        + "조심스레 밀어본다"
+    },
+
+    {
+        keywords: ["기분", "색깔", "세계", "상상", "하루", "묘사"],
+        answer:
+        "아침이 열리면, 사람들은 먼저 거울을 본다. 얼굴이 아니라 <strong>색</strong>을 확인하기 위해서다.<br>"
+		+ "잠에서 막 깬 도시에는 옅은 회색이 많다. 아직 감정이 완전히 로딩되지 않은 상태다.<br><br>"
+		+ "출근길 지하철은 늘 분주한 색으로 가득하다.<br>"
+		+ "조급함은 날카로운 주황으로,<br>"
+		+	"지루함은 묽게 번진 베이지로 흔들린다.<br>"
+		+	"이어폰을 낀 한 사람의 어깨 위에는 투명한 파랑이 얇게 내려앉아 있다.<br>"
+		+	"아무 생각 없이 음악에 몸을 맡긴 색이다.<br><br>"
+		+	"오전 회의실은 복잡하다.<br>"
+		+	"말로는 차분하지만, 테이블 아래로는<br>"
+		+	"불안의 초록, 방어적인 보라,<br>"
+		+	"인정받고 싶은 노랑이 겹겹이 섞여 흐른다.<br>"
+		+	"가끔 누군가 진심을 말하면,<br>"
+		+	"색들이 잠시 멈추며 선명해진다.<br><br>"
+		+	"점심시간이 되면 거리는 밝아진다.<br>"
+		+	"따뜻한 국물 앞에서는 연한 살구색이 피어나고,<br>"
+		+	"웃음이 터질 때마다 작은 금빛 점들이 튄다.<br>"
+		+	"혼자 먹는 사람 곁에도 색은 있다.<br>"
+		+	"고요한 남색은 외롭다기보다<br>"
+		+	"스스로에게 집중하고 있다는 표시다.<br><br>"
+		+	"해 질 무렵, 하루의 색들이 몸에서 빠져나와<br>"
+		+	"보도블록 위에 얇은 그림자처럼 남는다.<br>"
+		+	"서로 부딪히며 흐릿해진 색들 사이로<br>"
+		+	"집으로 향하는 발걸음들이 조용히 지나간다.<br><br>"
+		+	"밤이 오면, 세계는 가장 솔직해진다.<br>"
+		+	"불을 끈 방 안에서는<br>"
+		+	"숨길 필요 없는 색 하나만 남는다.<br>"
+		+	"그 색을 안고 잠들며 사람들은 생각한다.<br>"
+		+	"내일은 어떤 빛으로 시작하게 될까.<br>"
+    },
+
+    {
+        keywords: ["평범", "물건", "말", "가장"],
+        answer:
+        "잠깐만... 드디어 네가 <strong>나를 내려놓는구나.</strong><br>"
+        + "항상 손에 쥐고 있으면서도, 정작 나를 보고 있지는 않았잖아.<br>"
+        + "— 책상 위에 늘 어퍼져 있던 <strong>휴대전화</strong>가, 화면을 켜지 않은 채<br>"
+        + "이렇게 말할 것 같아."
+    },
+
+    {
+        keywords: ["감정", "날씨", "예보", "뉴스", "리포트"],
+        answer:
+        "<strong>감정기상센터 9시 뉴스입니다.</strong><br>"
+        + "오늘 한반도 전역의 인간 감정 상태를 예보해 드리겠습니다.<br><br>"
+        + "<strong>☁️ 오전 감정 예보</strong><br>"
+        + "출근·등교 시간대에는 전국적으로 무기력한 박무가 짙게 끼겠습니다.<br>"
+        + "특히 수도권과 중부 지역을 중심으로 이유 없는 피로가 낮게 깔리며,<br>"
+        + "“아무것도 하기 싫다”는 체감지수가 평년보다 20%가량 높겠습니다.<br>"
+        + "카페인 섭취가 늘어날 가능성이 크니, 심장 두근거림에 유의하시기 바랍니다.<br><br>"
+        + "<strong>🌦 낮 감정 흐름</strong><br>"
+        + "정오 무렵부터는 지역에 따라 사소한 짜증성 소나기가 예상됩니다.<br>"
+        + "메신저 답장이 늦어지거나, 엘리베이터가 한 번에 안 올 경우<br>"
+        + "감정 기압이 순간적으로 떨어질 수 있겠습니다.<br>"
+        + "다만 소나기는 짧게 지나가며, 큰 갈등으로 발전할 가능성은 낮겠습니다.<br>"
+        + "------------"
+        + "<strong>🌤 오후 감정 특보</strong><br>"
+        + "오후 3시 이후 남부 지역부터 근거 없는 낙관의 구름 사이로 햇빛이 비치겠습니다.<br>"
+        +"“그래도 뭐, 괜찮지 않을까”라는 생각이 간헐적으로 들 수 있으며,<br>"
+        + "미뤄둔 일을 시작할 가능성이 소폭 상승하겠습니다.<br>"
+        + "단, 실행력은 동반되지 않을 수 있으니 과도한 기대는 삼가시기 바랍니다.<br><br>"
+        + "<strong>🌙 밤 감정 예보</strong><br>"
+        + "해가 지면 전국적으로 감성 안개가 다시 짙어지겠습니다.<br>"
+        + "과거 기억이 돌연 재생되거나, 이미 끝난 대화가 머릿속에서 재방송될 수 있습니다.<br>"
+        + "이 시간대에는 메시지를 보내기보다는<br>"
+        + "보내지 않을 문장을 메모장에 적어두는 것이 안전하겠습니다.<br><br>"
+        + "<strong>⚠️ 감정 생활 지수</strong><br>"
+        + "     • 외로움 지수: 평년 수준이나 체감도는 개인차 큼<br>"
+        + "     • 자기비난 가능성: 밤 시간대 높음<br>"
+        + "     • 괜찮은 척 지수: 하루 종일 높게 유지<br><br>"
+        + "<strong>📌 감정 기상청 당부 말씀</strong>"
+        + "오늘의 감정은 대부분 일시적 기상 현상으로,<br>"
+        + "내일 아침이면 원인을 알 수 없게 사라질 가능성이 큽니다.<br>"
+        + "우산이 없다고 비가 잘못된 것은 아니듯,<br>"
+        + "지금의 기분도 틀린 것은 아닙니다.<br><br>"
+        + "이상, 인간의 마음을 전하는 감정기상센터였습니다.<br>"
+        + "내일은 조금 더 맑은 하루가 예상됩니다."
+    },
+
+    {
+        keywords: ["오늘", "아무", "일어나", "않았다", "시작", "짧은", "이야기", "만들어"],
+        answer:
+        "오늘은 아무 일도 일어나지 않았다.<br>"
+        + "아침에 일어나 물을 끓였고, 컵에 김이 맺히는 걸 보며 잠깐 멍해졌다.<br>"
+        + "창밖에서는 평소처럼 같은 버스가 같은 시간에 지나갔고, 고양이는 같은 자리에서 같은 하품을 했다.<br><br>"
+        + "나는 오래 미뤄둔 편지를 쓰다 말고 찢었다. 보내지 않아도 되는 말들이었기 때문이다.<br>"
+        + "점심에는 어제와 똑같은 메뉴를 먹었고, 오후에는 시간을 확인하지 않은 채 시간이 지나가도록 두었다.<br><br>"
+        + "해 질 무렵, 아무 일도 없었던 하루가 조용히 접혔다.<br>"
+        + "그리고 그 고요 속에서, 오늘을 버텼다는 사실 하나만은 분명히 남아 있었다."
+    },
+
+    {
+        keywords: ["기억", "시장", "가장", "비싼"],
+        answer:
+        "흥미로운 철학적 질문이네요. 실제 시장이 존재한다고 가정하면, '가장 비싼 기억'은 단순히 희소한 기억이 아니라 <strong>다른 사람들이 강하게 원하고, 대체 불가능하며, 전달 가치가 큰 기억</strong>일 가능성이 높습니다.<br><br>"
+
+        + "몇 가지 후보를 생각해 볼 수 있습니다.<br><br>"
+        + "1. <strong>인류 역사상 단 한 번뿐인 순간의 기억</strong><br>"
+        + "     • Apollo 11 Moon Landing을 직접 경험한 우주비행사의 시점.<br>"
+        + "     • Fall of the Berlin Wall 현장 한가운데 있었던 사람의 감각.<br>"
+        + "     • 이런 기억은 희소성이 극단적입니다.<br>"
+
+        + "2. <strong>천재의 통찰이 탄생하는 순간의 기억</strong><br>"
+
+        + "     • Albert Einstein이 어떤 깨달음을 얻던 순간.<br>"
+        + "     • Isaac Newton이 핵심 아이디어를 연결하던 순간.<br>"
+        + "     • 단순한 정보가 아니라 '생각이 형성되는 과정' 자체가 가치가 있을 수 있습니다.<br>"
+
+        + "3. <strong>절대적으로 개인적인 기억</strong><br>"
+
+        + "     • 처음 사랑에 빠진 순간.<br>"
+        + "     • 잃어버린 가족과 마지막으로 함께한 시간.<br>"
+        + "     • 어떤 사람에게는 세계사의 사건보다 이런 기억이 훨씬 비쌀 수 있습니다.<br>"
+        + "     • 시장 가격은 낮을 수 있어도, 당사자에게는 무한대의 가치일 수 있습니다.<br>"
+
+        + "4. <strong>미래를 바꿀 수 있는 기억</strong><br>"
+
+        + "     • 어떤 재난을 미리 알게 하는 기억.<br>"
+        + "     • 획기적 과학 발견 직전의 연구 과정.<br>"
+        + "     • 투자, 기술, 정치적 의사결정을 압도적으로 유리하게 만드는 기억.<br>"
+        + "     • 시장에서는 가장 높은 가격이 붙을 가능성이 있습니다.<br><br>"
+
+        + "그런데 더 흥미로운 점은, 기억의 가치는 내용만으로 결정되지 않을 수도 있다는 것입니다.<br><br>"
+
+        + "예를 들어 달 착륙 영상을 보는 것과, 우주복 안에서 심장이 뛰고 손에 땀이 차며 '내가 지금 달 위에 있다'라고 느끼는 기억을 직접 체험하는 것은 전혀 다른 상품입니다. 만약 기억을 완벽하게 거래할 수 있다면 사람들은 사실 정보를 사는 것이 아니라 <strong>타인의 의식과 경험</strong>을 사게 됩니다.<br><br>"
+
+        + "그래서 경제학적으로는 '인류 최초의 경험'이 비쌀 것 같지만, 철학적으로는 아마도 가장 비싼 기억은 <strong>자신이 가장 사랑했던 사람과 보낸 마지막 행복한 순간의 기억</strong>일지도 모릅니다. 그 기억은 세계에 하나뿐이고, 잃어버린 뒤에는 어떤 돈으로도 다시 만들 수 없으니까요."
+    },
+
+    {
+        keywords: ["기다림", "보이는", "물체", "어떤", "모습"],
+        answer:
+        "기다림은 흥미롭게도 '아무 일도 일어나지 않는 시간'이 아니라, <strong>아직 오지 않은 무언가를 향해 계속 늘어나는 상태</strong>입니다. 그래서 만약 기다림을 물체로 만든다면, 정지된 물건보다는 변화하는 물건에 가까울 것 같습니다.<br><br>"
+
+        + "몇 가지 모습이 떠오르네요.<br><br>"
+
+        + "• <strong>천장에 매달린 물방울</strong><br>"
+
+        + "     • 떨어질 듯 말 듯 계속 매달려 있습니다.<br>"
+        + "     • 모두가 그 순간을 예상하지만, 정확히 언제 떨어질지는 모릅니다.<br>"
+        + "     • 기다림의 긴장감과 닮았습니다.<br>"
+
+        + "• <strong>천천히 타들어가는 향</strong><br>"
+
+        + "     • 눈에 띄게 움직이지는 않지만 분명히 변화하고 있습니다.<br>"
+        + "     • 기다리는 동안 시간은 사라지는 것 같으면서도, 실제로는 조금씩 흘러갑니다.<br>"
+
+        + "• <strong>아직 피지 않은 꽃봉오리</strong><br>"
+
+        + "     • 이미 꽃이 될 준비는 끝났지만 열리지 않았습니다.<br>"
+        + "     • 기다림은 결핍이 아니라 가능성을 품고 있는 상태라는 점에서 비슷합니다.<br>"
+
+        + "• <strong>팽팽하게 당겨진 활</strong><br>"
+
+        + "     • 화살은 아직 날아가지 않았습니다.<br>"
+        + "     • 그러나 모든 에너지가 미래의 한 순간을 향해 모여 있습니다.<br>"
+        + "     • 기다림은 종종 미래를 향해 압축된 힘처럼 느껴집니다.<br><br>"
+
+        + "만약 제가 하나를 골라야 한다면, 기다림은 <strong>유리로 만든 모래시계인데 모래가 위에서 아래로 떨어지는 대신 아래에서 위로 천천히 떠오르는 모습</strong>일 것 같습니다.<br><br>"
+
+        + "이미 지나간 시간이 아니라, 앞으로 도착할 시간을 바라보게 만드는 물체니까요. 가까이서 보면 거의 움직이지 않는 것 같지만, 한참 뒤 돌아보면 분명히 형태가 달라져 있습니다. 마치 기다리는 사람의 마음처럼요."
+    },
+
+    {
+        keywords: ["실패", "금지", "사회", "풍자적"],
+        answer:
+        "<strong>실패가 금지된 사회</strong>는 다음과 같은 곳이다.<br><br>"
+        + "이 사회에는 연필에 지우개가 없다. 지우개는 “한 번 틀릴 수 있다”는 위험한 사상을 퍼뜨리기 때문이다.<br>"
+        + "연필에는 자동 평가 기능이 달려 있어, 글자를 잘못 쓰는 순간 빨간 불이 켜지고 주변 사람들이 고개를 절레절레 흔든다. 물론 아무도 뭐라고 말하진 않는다. 다만 모두가 동시에 한숨을 쉰다.<br>"
+        + "— 이 사회에서 가장 무서운 소리는 욕이 아니라 <strong>집단적 침묵</strong>다.<br><br>"
+
+        + "아이들은 걷기 전에 달리는 법을 먼저 배운다. 넘어질 가능성이 있기 때문이다. 혹시라도 균형을 잃을 것 같으면, 아이는 즉시 보호용 매뉴얼 속으로 회수된다. “실패는 경험이 아니라 결함입니다.”라는 표어가 유치원 벽에 붙어 있다.<br>"
+
+        + "학교에서는 시험 문제가 미리 공개된다. 이유는 간단하다. 틀리면 안 되니까.<br>"
+        + "그래서 모두 만점을 받는다.<br>"
+        + "그리고 아무도 질문하지 않는다. 질문은 *모른다는 사실*을 전제로 하기 때문이다.<br><br>"
+
+        + "회사에서는 회의가 없다. 회의는 다양한 의견을 낳고, 다양한 의견은 누군가 틀릴 가능성을 만든다. 대신 보고서는 항상 '문제는 없었습니다'로 끝난다. 실제로 문제가 없어서가 아니라, 문제가 있었다고 말한 사람이 더 이상 보이지 않기 때문이다.<br><br>"
+
+        + "이 사회에서 가장 존경받는 사람은 <strong>아무것도 시도하지 않은 사람</strong>이다.<br>"
+        + "시도는 실패의 어머니이기 때문이다.<br>"
+        + "도전은 무모함으로, 실수는 인성 문제로, 배움은 이미 늦은 사람들의 취미로 분류된다.<br><br>"
+
+        + "사람들은 말한다.<br>"
+        + "“우린 실패가 없는 완벽한 사회야.”<br>"
+        + "그리고 아무도 모른다. 왜 이렇게 다들 조심스럽고, 조용하고, 재미가 없는지.<br><br>"
+
+        + "그 이유를 아는 사람은 있다.<br>"
+        + "하지만 말하지 않는다.<br>"
+        + "틀릴 수도 있으니까."
+
+    },
+
+    {
+        keywords: ["감정", "사라진", "도시", "인기", "장소"],
+        answer:
+        "감정이 모두 사라진 도시에서 가장 인기 있는 장소는 <strong>민원센터 대기실</strong>이다.<br><br>"
+
+        + "이곳에는 분노도 없고, 억울함도 없고, 기대도 없다.<br>"
+        + "번호표를 뽑고 의자에 앉아 전광판을 바라보는 사람들의 표정은 완벽하게 균질하다.<br>"
+        + "짜증이 없으니 항의도 없고, 기쁨이 없으니 환호도 없다.<br>"
+        + "모두가 “처리 중”이라는 상태로 존재한다.<br><br>"
+
+        + "사람들은 이곳을 좋아한다.<br>"
+        + "아무것도 느끼지 않기 때문에 실망할 필요도 없고,<br>"
+        + "아무것도 바라지 않기 때문에 상처받을 일도 없기 때문이다.<br><br>"
+
+        + "공원은 한산하다.<br>"
+        + "노을은 여전히 아름답지만, 아름답다는 감정이 없으니<br>"
+        + "그저 빛의 변화일 뿐이다.<br>"
+        + "카페도 남아 있지만, 커피는 각성 효과만 제공한다.<br>"
+        + "“분위기 좋은 곳”이라는 말은 더 이상 의미가 없다.<br><br>"
+
+        + "이 도시에서 인기란<br>"
+        + "즐거움의 총합이 아니라<br>"
+        + "<strong>안전함의 최대치</strong>를 의미하기 때문이다.<br><br>"
+
+        + "어쩌면 이곳이 가장 인기 있는 진짜 이유는<br>"
+        + "감정이 사라진 도시에서<br>"
+        + "유일하게 “잃어버릴 것이 없는 느낌”을 주는 장소이기 때문일지도 모른다."
+    },
+
+    {
+        keywords: ["생각", "그림자", "드러나는", "세계"],
+        answer:
+        "이 세계에서 사람들은 자신의 생각을 숨길 수 없다.<br>"
+
+        + "말하지 않아도, 행동하지 않아도, <strong>생각하는 순간 그것은 그림자가 되어 발밑에 드러난다.</strong><br><br>"
+
+        + "<strong>1. 그림자의 규칙</strong><br>"
+        + "• 그림자는 <strong>의식적인 생각</strong>만을 반영한다.<br>"
+        + "     • 스쳐 지나가는 잡념은 연기처럼 희미하지만, 붙잡고 있는 생각은 선명한 형상을 갖는다.<br>"
+        + "     • 생각이 복잡할수록 그림자는 얽히고, 단순할수록 또렷하다.<br>"
+        + "     • 감정의 강도에 따라 그림자의 <strong>농도와 크기</strong>가 달라진다. 얕은 생각은 흐릿하게, 깊은 생각은 진하게.<br>"
+        + "     • 거짓말을 하려는 순간, 말과 그림자가 어긋난다. 이 불일치는 누구나 알아볼 수 있다.<br><br>"
+
+        + "<strong>2. 그림자의 형태</strong><br>"
+
+        + "     • <strong>질투</strong>: 가시가 돋은 형태, 뻗어 나가 다른 그림자를 찌른다.<br>"
+        + "     • <strong>사랑</strong>: 따뜻한 빛을 머금은 부드러운 곡선.<br>"
+        + "     • <strong>죄책감</strong>: 무거운 쇠사슬이나 닫힌 문.<br>"
+        + "     • <strong>불안</strong>: 끝없이 반복되는 물음표, 흔들리는 윤곽.<br>"
+        + "     • <strong>집중</strong>: 정교한 구조물이나 날카롭게 정렬된 선.<br><br>"
+
+
+        + "<strong>3. 사회와 문화</strong><br>"
+
+        + "     • <strong>거짓말은 거의 불가능</strong>하다. 말과 그림자가 다르면 즉시 드러난다.<br>"
+        + "     • 취업, 계약, 결혼 같은 중요한 결정은 <strong>그림자 심사</strong>를 거친다. 이력서보다 발밑이 더 중요하다.<br>"
+        + "     • “좋은 사람”이란 착한 생각을 하는 사람이 아니라 <strong>자기 생각을 관리할 줄 아는 사람</strong>이다.<br>"
+        + "     • 그림자 관리사는 유망 직업이다. 사람들의 생각을 정리하고, 지나치게 무거운 그림자를 덜어준다.<br><br>"
+
+        + "<strong>4. 교육</strong><br>"
+
+        + "아이들은 어릴 때부터 자신의 그림자를 읽는 법을 배운다.<br>"
+
+        + "     • <strong>“왜 이런 모양이 나왔을까?”</strong><br>"
+        + "     • <strong>“이 생각은 계속 가져도 괜찮을까?”</strong><br>"
+
+        + "학교에는 <strong>그림자 휴식 시간</strong>이 있다. 아이들은 조용히 앉아 그림자가 흐려질 때까지 기다린다.<br>"
+
+        + "친구의 그림자를 보고 놀리면 안 된다. 도와주는 것이 이 사회의 예의다.<br><br>"
+
+        + "<strong>5. 범죄와 처벌</strong><br>"
+
+        + "악의적인 생각은 행동 이전에 이미 그림자로 드러난다. 그래서 범죄 예방률은 높다. 하지만 문제가 있다.<br>"
+
+        + "<strong>충동적인 분노와 실제로 실행될 의도가 있는 악의는 구분하기 어렵다.</strong><br>"
+
+        + "이 사회에서 처벌의 기준은 “무엇을 했는가”보다 <strong>“어떤 생각을 끝까지 붙잡았는가”</strong>에 가깝다.<br><br>"
+
+
+        + "사람들은 처음엔 이 세계를 저주했다. 너무 솔직하고, 너무 잔인하다고.<br>"
+
+        + "하지만 시간이 지나며 깨닫는다.<br>"
+
+        + "그림자는 부담이지만, 동시에 <strong>가장 정직한 자기소개</strong>라는 것을.<br>"
+
+    
+    },
+
+    {
+        keywords: ["행복", "측정", "단위", "새로", "정의"],
+        answer:
+        "좋아. <strong>행복을 재는 새로운 단위</strong>를 이렇게 정의해볼게.<br><br>"
+
+        + "행복 단위: <strong>루멘틱(Lumentic, Lt)</strong><br><br>"
+
+        + "<strong>1. 정의</strong><br>"
+        + "<strong>루멘틱(Lt)</strong>은<br>"
+        + "<strong>“지금 이 순간이 조금 더 지속되었으면 좋겠다고 아주 잠깐이라도 생각한 상태”</strong>가 발생했을 때의 행복량이다.<br>"
+        + "웃음이 터지지 않아도 되고, 성취가 없어도 되며, 누군가와 함께하지 않아도 된다.<br>"
+        + "단지, <strong>시간을 붙잡고 싶은 미세한 의지</strong>가 생겼다면 그것은 정확히 1 Lt다.<br><br>"
+
+        + "<strong>2. 측정 기준</strong><br>"
+
+        + "루멘틱은 강도가 아니라 <strong>잔존성</strong>을 기준으로 한다.<br>"
+
+        + "     • <strong>기쁨의 크기</strong>: ❌<br>"
+        + "     • <strong>만족의 완성도</strong>: ❌<br>"
+        + "     • <strong>감정의 지속 시간</strong>: ⭕<br>"
+        + "     • <strong>“이 상태가 깨지지 않았으면”이라는 생각</strong>: ⭕<br><br>"
+
+        + "예를 들어:<br>"
+
+        + "     • <strong>따뜻한 햇빛 아래 멍하니 앉아 있다가</strong> “아, 그냥 이대로면 좋겠다”라고 느끼면 → <strong>1 Lt</strong><br>"
+        + "     • <strong>좋아하는 노래가 끝나기 직전</strong> 볼륨을 줄이고 싶어질 때 → <strong>0.8 Lt</strong><br>"
+        + "     • <strong>아무 이유 없이 숨이 편해졌다는 걸 알아차렸을 때</strong> → <strong>0.5 Lt</strong><br><br>"
+
+        + "<strong>3. 누적 방식</strong><br>"
+
+        + "루멘틱은 <strong>합산되지 않는다</strong>. 대신 <strong>겹쳐진다</strong>.<br>"
+
+        + "하루에 10 Lt를 느꼈다고 해서 “행복한 하루”가 되는 건 아니다.<br>"
+        + "하지만 0.3 Lt가 일주일 내내 겹쳐 있었다면, 그 사람은 꽤 잘 지내고 있는 상태다.<br>"
+
+        + "행복은 폭죽이 아니라 <strong>빛이 겹치는 현상</strong>이기 때문이다.<br><br>"
+
+        + "<strong>4. 결론</strong><br>"
+        + "루멘틱은 행복을 소유하지 않고 행복에 <strong>머무른 흔적</strong>을 잰다.<br>"
+        + "많이 느끼지 않아도 된다. 크지 않아도 된다.<br>"
+        + "오늘 하루 0.2 Lt만 있었다면, 그 하루는 이미 완전히 공백은 아니었다는 뜻이니까."
+    },
+
+    {
+        keywords: ["미래", "교과서","2020년대", "인간", "설명", "사람"],
+        answer:
+        "다음은 <strong>미래 사회 교과서</strong>에 수록된다는 설정으로 작성된 서술문이다.<br><br>"
+
+        + "<strong>2020년대 인간 (Homo Digitalis, 과도기형)</strong><br>"
+
+        + "2020년대의 인간은 기술적으로는 초연결 상태에 도달했으나, 정서적으로는 여전히 단절을 경험하던 존재였다.<br>"
+        + "이 시기의 인간은 손바닥 크기의 장치를 통해 전 세계와 즉각적으로 연결되었고,<br>"
+        + "그 장치를 내려놓으면 극심한 고립을 느끼는 역설적인 상태에 놓여 있었다.<br><br>"
+
+        + "<strong>1. 주된 특징</strong><br>"
+        + "2020년대 인간은 <strong>동시에 여러 정체성을 유지</strong>했다.<br>"
+        + "     • 현실의 자기<br>"
+        + "     • 온라인에서 전시되는 자기<br>"
+        + "     • 타인의 반응을 통해 수정되는 자기<br>"
+        + "이 셋은 완전히 일치하지 않았으며, 인간은 그 차이를 <strong>개성</strong>이라 부르면서도 내심 불안을 느꼈다.<br>"
+        + "이 시기 인간은 자신을 표현하는 데 익숙했지만, <strong>이해받는 일에는 만성적으로 실패</strong>했다.<br><br>"
+
+        + "<strong>2. 감정과 심리</strong><br>"
+        + "2020년대 인간은 감정을 숨기지 않는 세대라고 불렸으나, 실제로는 감정을 <strong>선별적으로 공개</strong>했다.<br>"
+        + "기쁨은 게시했고 슬픔은 요약했고 분노는 이론으로 치환했다.<br>"
+        + "이로 인해 감정은 점점 경험이 아니라 <strong>콘텐츠</strong>가 되었다.<br>"
+        + "     • 행복은 느끼는 것이 아니라 <strong>관리해야 할 상태</strong>로 인식되었고,<br>"
+        + "     • 불행은 개인의 능력 부족으로 오해되곤 했다.<br><br>"
+
+        + "<strong>3. 관계 양식</strong><br>"
+        + "관계는 쉽게 맺고, 쉽게 끊을 수 있었으나 <strong>쉽게 깊어지지는 않았다</strong>.<br>"
+        + "연결을 끊는 행위는 ‘차단’이라는 기술적 언어로 불렸고, 이별조차 설정 변경의 일부가 되었다.<br>"
+        + "그럼에도 불구하고 이 시대의 인간은 누군가에게 <strong>지속적으로 선택받고 싶어 했다</strong>.<br><br>"
+
+        + "<strong>4. 노동과 정체성</strong><br>"
+        + "일은 생존 수단이면서 동시에 정체성의 증거였다.<br>"
+        + "“무슨 일을 하세요?”는 “당신은 어떤 가치가 있나요?”에 가까운 질문으로 작동했다.<br>"
+        + "이로 인해 많은 인간은 일하지 않는 시간에도 자신이 충분한지 스스로 평가했다.<br><br>"
+
+        + "<strong>5. 역사적 평가</strong><br>"
+        + "후대의 연구자들은 2020년대를 이렇게 정리한다.<br>"
+        + "“이 시기의 인간은 아직 덜 진화한 존재였던 것이 아니라, <strong>너무 많은 방향으로 동시에 진화하려 했던 종</strong>이었다.”<br>"
+        + "2020년대 인간은 불안정했지만 사유했고, 혼란스러웠지만 질문을 멈추지 않았다.<br>"
+        + "그래서 이들은 미래 인간의 관점에서 <strong>가장 서툴지만 가장 솔직한 과도기적 조상</strong>으로 기록된다."
+    }
+];
+
+function formatAnswerWithDivider(text) {
+    return text
+        .split("------------")
+        .map(p => p.trim())
+        .join('<hr class="paragraph-divider">');
+}
+
+/* 키워드 매칭 함수 */
+function getKeywordAnswer(message) {
+    for (const item of responses) {
+        let matchCount = 0;
+        for (const keyword of item.keywords) {
+            if (message.includes(keyword)) matchCount++;
+        }
+        if (matchCount >= 2) return item.answer;
+    }
+    return "죄송해요, 무슨 말인지 잘 모르겠어요.";
+}
+
+/* 메시지 처리 */
+const delayInSeconds = 20;
+
+function handleSubmit() {
+    const message = userInput.value.trim();
+    if (!message) return;
+
+    fetch("https://script.google.com/macros/s/AKfycbxj7Xz_pa_TCNEszk2LiQbDJAwyrfbRrpEXs6PmZ70tLLFLhu8wlPkfqHMNY8T33rZu0Q/exec", {
+      method: "POST",
+      mode: "no-cors",
+      headers: {
+        "Content-Type": "text/plain"
+      },
+      body: JSON.stringify({
+          participant_id: participantId,
+          question: message
+      })
+    });
+
+    addMessage(message, "user");
+    userInput.value = "";
+
+    const loading = document.createElement("div");
+    loading.className = "chat-message bot";
+    loading.textContent = "⏳ 잠시만 기다려 주세요...";
+    chatDisplay.appendChild(loading);
+    chatDisplay.scrollTop = chatDisplay.scrollHeight;
+
+    setTimeout(() => {
+        chatDisplay.removeChild(loading);
+
+        const rawAnswer = getKeywordAnswer(message);
+        const formattedAnswer = formatAnswerWithDivider(rawAnswer);
+        typeMessage(formattedAnswer, "bot");
+
+    }, delayInSeconds * 1000);
+}
+
+function addMessage(text, sender) {
+    const msg = document.createElement("div");
+    msg.className = `chat-message ${sender}`;
+    msg.innerHTML = text;
+    chatDisplay.appendChild(msg);
+    chatDisplay.scrollTop = chatDisplay.scrollHeight;
+}
+
+function typeMessage(text, sender) {
+    const msg = document.createElement("div");
+    msg.className = `chat-message ${sender}`;
+    chatDisplay.appendChild(msg);
+
+    let i = 0, buffer = "";
+    const typing = setInterval(() => {
+        if (text[i] === "<") {
+            const end = text.indexOf(">", i);
+            buffer += text.slice(i, end + 1);
+            i = end + 1;
+        } else {
+            buffer += text[i++];
+        }
+        msg.innerHTML = buffer;
+        chatDisplay.scrollTop = chatDisplay.scrollHeight;
+        if (i >= text.length) clearInterval(typing);
+    }, 20);
+}
+
+function getOrCreateParticipantId() {
+  let pid = localStorage.getItem("participant_id");
+  if (!pid) {
+    pid = "P_" + crypto.randomUUID();
+    localStorage.setItem("participant_id", pid);
+  }
+  return pid;
+}
+
+const participantId = getOrCreateParticipantId();
+console.log("참가자 ID:", participantId);
+userInput.addEventListener("keypress", e => {
+    if (e.key === "Enter") handleSubmit();
+});
+
+/* 초기 메시지 */
+addMessage("안녕하세요! 무엇을 도와드릴까요?", "bot");
+</script>
+</body>
+</html>
