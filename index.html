@@ -164,7 +164,8 @@ console.log("SoSci CASE ID:", socsiCaseId);
    ========================= */
 const GOOGLE_SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbz4BgOz4T-N7botHv_hR1Ly_qLwEmNbtKciPN4weRqrmrJxIzo1ImIxfBlwKnVSKMJttg/exec";
-
+const chatDisplay = document.getElementById("chatDisplay");
+const userInput = document.getElementById("userInput");
 const participantId = getOrCreateParticipantId();
 console.log("참가자 ID:", participantId);
 userInput.addEventListener("keypress", e => {
@@ -189,10 +190,6 @@ function saveChatLog(userText, botText) {
   })
   .catch(err => console.error("저장 실패:", err));
 }
-
-
-const chatDisplay = document.getElementById("chatDisplay");
-const userInput = document.getElementById("userInput");
 
 /* 키워드 기반 응답 데이터 */
 const responses = [
