@@ -159,6 +159,38 @@ const socsiCaseId = urlParams.get("case");
 console.log("SoSci CASE ID:", socsiCaseId);
 
 
+/* =========================
+   2. Google Script URL
+   ========================= */
+const GOOGLE_SCRIPT_URL =
+  "https://script.google.com/macros/s/AKfycbz4BgOz4T-N7botHv_hR1Ly_qLwEmNbtKciPN4weRqrmrJxIzo1ImIxfBlwKnVSKMJttg/exec";
+
+const participantId = getOrCreateParticipantId();
+console.log("참가자 ID:", participantId);
+userInput.addEventListener("keypress", e => {
+    if (e.key === "Enter") handleSubmit();
+});  
+/* =========================
+   3. 저장 전용 함수
+   ========================= */
+function saveChatLog(userText, botText) {
+  fetch(GOOGLE_SCRIPT_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      caseId: socsiCaseId,
+      participantId: participantId,
+      userMessage: userText,
+      botResponse: botText,
+      timestamp: new Date().toISOString()
+    })
+  })
+  .catch(err => console.error("저장 실패:", err));
+}
+
+
 const chatDisplay = document.getElementById("chatDisplay");
 const userInput = document.getElementById("userInput");
 
@@ -682,38 +714,34 @@ function getKeywordAnswer(message) {
 const delayInSeconds = 3;
 
 function handleSubmit() {
-    const message = userInput.value.trim();
-    if (!message) return;
+  const message = userInput.value.trim();
+  if (!message) return;
 
-    fetch("https://script.google.com/macros/s/AKfycbxj7Xz_pa_TCNEszk2LiQbDJAwyrfbRrpEXs6PmZ70tLLFLhu8wlPkfqHMNY8T33rZu0Q/exec", {
-      method: "POST",
-      mode: "no-cors",
-      headers: {
-        "Content-Type": "text/plain"
-      },
-      body: JSON.stringify({
-          participant_id: participantId,
-          question: message
-      })
-    });
+  // 1. 사용자 메시지 출력
+  addMessage(message, "user");
+  userInput.value = "";
 
-    addMessage(message, "user");
-    userInput.value = "";
+  // 2. 로딩 메시지
+  const loading = document.createElement("div");
+  loading.className = "chat-message bot";
+  loading.textContent = "⏳ 잠시만 기다려 주세요...";
+  chatDisplay.appendChild(loading);
+  chatDisplay.scrollTop = chatDisplay.scrollHeight;
 
-    const loading = document.createElement("div");
-    loading.className = "chat-message bot";
-    loading.textContent = "⏳ 잠시만 기다려 주세요...";
-    chatDisplay.appendChild(loading);
-    chatDisplay.scrollTop = chatDisplay.scrollHeight;
+  setTimeout(() => {
+    chatDisplay.removeChild(loading);
 
-    setTimeout(() => {
-        chatDisplay.removeChild(loading);
+    // 3. 봇 응답 생성
+    const rawAnswer = getKeywordAnswer(message);
+    const formattedAnswer = formatAnswerWithDivider(rawAnswer);
 
-        const rawAnswer = getKeywordAnswer(message);
-        const formattedAnswer = formatAnswerWithDivider(rawAnswer);
-        typeMessage(formattedAnswer, "bot");
+    // 4. 봇 응답 출력
+    typeMessage(formattedAnswer, "bot");
 
-    }, delayInSeconds * 1000);
+    // 5. Google Script 저장
+    saveChatLog(message, formattedAnswer);
+
+  }, delayInSeconds * 1000);
 }
 
 function addMessage(text, sender) {
@@ -753,11 +781,6 @@ function getOrCreateParticipantId() {
   return pid;
 }
 
-const participantId = getOrCreateParticipantId();
-console.log("참가자 ID:", participantId);
-userInput.addEventListener("keypress", e => {
-    if (e.key === "Enter") handleSubmit();
-});
 
 /* 초기 메시지 */
 addMessage("안녕하세요! 무엇을 도와드릴까요?", "bot");
