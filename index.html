@@ -105,7 +105,7 @@
             border: none;
             background-color: #4CAF50;
             color: white;
-            font-size: 10px;
+            font-size: 13px;
             font-weight: bold;
             cursor: pointer;
             border-top-right-radius: 10px;
@@ -126,7 +126,7 @@
         .chat-message .bullet {
             display: block;
             padding-left: 1.8em;   /* 전체 들여쓰기 */
-            text-indent: -1.2em;   /* 첫 줄만 앞으로 당김 */
+            text-indent: -0.8em;   /* 첫 줄만 앞으로 당김 */
         }
 
     </style>
@@ -157,7 +157,12 @@ const userInput = document.getElementById("userInput");
 const responses = [
         
     {
-        keywords: ["봄", "시", "짧은", "만들어"],
+        keywords: [
+            { word: "봄", weight: 3 },
+            { word: "시", weight: 3 },
+            { word: "짧은", weight: 1 },
+            { word: "만들어", weight: 1 }
+            ], 
         answer:
         "연둣빛 숨이<br>"
         + "창가에 먼저 도착해<br>"
@@ -171,10 +176,15 @@ const responses = [
     },
 
     {
-        keywords: ["기분", "색깔", "세계", "상상", "하루", "묘사"],
+        keywords: [
+            { word: "기분", weight: 3 },
+            { word: "색깔", weight: 3 },
+            { word: "세계", weight: 1 },
+            { word: "상상", weight: 1 }
+            ], 
         answer:
-        "아침이 열리면, 사람들은 먼저 거울을 본다. 얼굴이 아니라 <strong>색</strong>을 확인하기 위해서다.<br>"
-		+ "잠에서 막 깬 도시에는 옅은 회색이 많다. 아직 감정이 완전히 로딩되지 않은 상태다.<br><br>"
+        "아침이 열리면, 사람들은 먼저 거울을 본다.<br>얼굴이 아니라 <strong>색</strong>을 확인하기 위해서다.<br>"
+		+ "잠에서 막 깬 도시에는 옅은 회색이 많다.<br> 아직 감정이 완전히 로딩되지 않은 상태다.<br><br>"
 		+ "출근길 지하철은 늘 분주한 색으로 가득하다.<br>"
 		+ "조급함은 날카로운 주황으로,<br>"
 		+	"지루함은 묽게 번진 베이지로 흔들린다.<br>"
@@ -204,16 +214,27 @@ const responses = [
     },
 
     {
-        keywords: ["평범", "물건", "말", "가장"],
+        keywords: [
+            { word: "평범", weight: 3 },
+            { word: "물건", weight: 3 },
+            { word: "말", weight: 2 },
+            { word: "갑자기", weight: 2 }
+            ], 
         answer:
         "잠깐만... 드디어 네가 <strong>나를 내려놓는구나.</strong><br>"
-        + "항상 손에 쥐고 있으면서도, 정작 나를 보고 있지는 않았잖아.<br>"
+        + "항상 손에 쥐고 있으면서도, 정작 나를 보고 있지는 않았잖아.<br><br>"
         + "— 책상 위에 늘 어퍼져 있던 <strong>휴대전화</strong>가, 화면을 켜지 않은 채<br>"
         + "이렇게 말할 것 같아."
     },
 
     {
-        keywords: ["감정", "날씨", "예보", "뉴스", "리포트"],
+        keywords: [
+            { word: "감정", weight: 3 },
+            { word: "날씨", weight: 3 },
+            { word: "예보", weight: 2 },
+            { word: "뉴스", weight: 2 },
+            { word: "리포트", weight: 2 }
+            ],
         answer:
         "<strong>감정기상센터 9시 뉴스입니다.</strong><br>"
         + "오늘 한반도 전역의 인간 감정 상태를 예보해 드리겠습니다.<br><br>"
@@ -242,7 +263,7 @@ const responses = [
         + "<span class='bullet'>• 외로움 지수: 평년 수준이나 체감도는 개인차 큼</span>"
         + "<span class='bullet'>• 자기비난 가능성: 밤 시간대 높음</span>"
         + "<span class='bullet'>• 괜찮은 척 지수: 하루 종일 높게 유지</span><br>"
-        + "<strong>📌 감정 기상청 당부 말씀</strong>"
+        + "<strong>📌 감정 기상청 당부 말씀</strong><br>"
         + "오늘의 감정은 대부분 일시적 기상 현상으로,<br>"
         + "내일 아침이면 원인을 알 수 없게 사라질 가능성이 큽니다.<br>"
         + "우산이 없다고 비가 잘못된 것은 아니듯,<br>"
@@ -252,42 +273,35 @@ const responses = [
     },
 
     {
-        keywords: ["오늘", "아무", "일어나", "않았다", "시작", "짧은", "이야기", "만들어"],
-        answer:
-        "오늘은 아무 일도 일어나지 않았다.<br>"
-        + "아침에 일어나 물을 끓였고, 컵에 김이 맺히는 걸 보며 잠깐 멍해졌다.<br>"
-        + "창밖에서는 평소처럼 같은 버스가 같은 시간에 지나갔고, 고양이는 같은 자리에서 같은 하품을 했다.<br><br>"
-        + "나는 오래 미뤄둔 편지를 쓰다 말고 찢었다. 보내지 않아도 되는 말들이었기 때문이다.<br>"
-        + "점심에는 어제와 똑같은 메뉴를 먹었고, 오후에는 시간을 확인하지 않은 채 시간이 지나가도록 두었다.<br><br>"
-        + "해 질 무렵, 아무 일도 없었던 하루가 조용히 접혔다.<br>"
-        + "그리고 그 고요 속에서, 오늘을 버텼다는 사실 하나만은 분명히 남아 있었다."
-    },
-
-    {
-        keywords: ["기억", "시장", "가장", "비싼"],
+        keywords: [
+            { word: "기억", weight: 3 },
+            { word: "시장", weight: 3 },
+            { word: "가장", weight: 2 },
+            { word: "비싼", weight: 2 }
+            ],
         answer:
         "흥미로운 철학적 질문이네요. 실제 시장이 존재한다고 가정하면, '가장 비싼 기억'은 단순히 희소한 기억이 아니라 <strong>다른 사람들이 강하게 원하고, 대체 불가능하며, 전달 가치가 큰 기억</strong>일 가능성이 높습니다.<br><br>"
 
         + "몇 가지 후보를 생각해 볼 수 있습니다.<br><br>"
-        + "1. <strong>인류 역사상 단 한 번뿐인 순간의 기억</strong><br>"
+        + "<strong>1. 인류 역사상 단 한 번뿐인 순간의 기억</strong><br>"
         + "<span class='bullet'>• Apollo 11 Moon Landing을 직접 경험한 우주비행사의 시점.</span>"
         + "<span class='bullet'>• Fall of the Berlin Wall 현장 한가운데 있었던 사람의 감각.</span>"
-        + "<span class='bullet'>• 이런 기억은 희소성이 극단적입니다.</span>"
+        + "<span class='bullet'>• 이런 기억은 희소성이 극단적입니다.</span><br>"
 
-        + "2. <strong>천재의 통찰이 탄생하는 순간의 기억</strong><br>"
+        + "<strong>2. 천재의 통찰이 탄생하는 순간의 기억</strong><br>"
 
         + "<span class='bullet'>• Albert Einstein이 어떤 깨달음을 얻던 순간.</span>"
         + "<span class='bullet'>• Isaac Newton이 핵심 아이디어를 연결하던 순간.</span>"
-        + "<span class='bullet'>• 단순한 정보가 아니라 '생각이 형성되는 과정' 자체가 가치가 있을 수 있습니다.</span>"
+        + "<span class='bullet'>• 단순한 정보가 아니라 '생각이 형성되는 과정' 자체가 가치가 있을 수 있습니다.</span><br>"
 
-        + "3. <strong>절대적으로 개인적인 기억</strong><br>"
+        + "<strong>3. 절대적으로 개인적인 기억</strong><br>"
 
         + "<span class='bullet'>• 처음 사랑에 빠진 순간.</span>"
         + "<span class='bullet'>• 잃어버린 가족과 마지막으로 함께한 시간.</span>"
         + "<span class='bullet'>• 어떤 사람에게는 세계사의 사건보다 이런 기억이 훨씬 비쌀 수 있습니다.</span>"
-        + "<span class='bullet'>• 시장 가격은 낮을 수 있어도, 당사자에게는 무한대의 가치일 수 있습니다.</span>"
+        + "<span class='bullet'>• 시장 가격은 낮을 수 있어도, 당사자에게는 무한대의 가치일 수 있습니다.</span><br>"
 
-        + "4. <strong>미래를 바꿀 수 있는 기억</strong><br>"
+        + "<strong>4. 미래를 바꿀 수 있는 기억</strong><br>"
 
         + "<span class='bullet'>• 어떤 재난을 미리 알게 하는 기억.</span>"
         + "<span class='bullet'>• 획기적 과학 발견 직전의 연구 과정.</span>"
@@ -300,7 +314,13 @@ const responses = [
     },
 
     {
-        keywords: ["기다림", "보이는", "물체", "어떤", "모습"],
+        keywords: [
+            { word: "기다림", weight: 3 },
+            { word: "보이는", weight: 2 },
+            { word: "물체", weight: 2 },
+            { word: "어떤", weight: 1 },
+            { word: "모습", weight: 1 }
+            ],
         answer:
         "기다림은 흥미롭게도 '아무 일도 일어나지 않는 시간'이 아니라, <strong>아직 오지 않은 무언가를 향해 계속 늘어나는 상태</strong>입니다. 그래서 만약 기다림을 물체로 만든다면, 정지된 물건보다는 변화하는 물건에 가까울 것 같습니다.<br><br>"
 
@@ -334,18 +354,19 @@ const responses = [
     },
 
     {
-        keywords: ["실패", "금지", "사회", "풍자적"],
+        keywords: [
+            { word: "실패", weight: 3 },
+            { word: "금지", weight: 3 },
+            { word: "사회", weight: 2 },
+            { word: "풍자적", weight: 2 }
+            ],
         answer:
         "<strong>실패가 금지된 사회</strong>는 다음과 같은 곳이다.<br><br>"
         + "이 사회에는 연필에 지우개가 없다. 지우개는 “한 번 틀릴 수 있다”는 위험한 사상을 퍼뜨리기 때문이다.<br>"
-        + "연필에는 자동 평가 기능이 달려 있어, 글자를 잘못 쓰는 순간 빨간 불이 켜지고 주변 사람들이 고개를 절레절레 흔든다. 물론 아무도 뭐라고 말하진 않는다. 다만 모두가 동시에 한숨을 쉰다.<br>"
-        + "— 이 사회에서 가장 무서운 소리는 욕이 아니라 <strong>집단적 침묵</strong>다.<br><br>"
+        + "연필에는 자동 평가 기능이 달려 있어, 글자를 잘못 쓰는 순간 빨간 불이 켜지고 주변 사람들이 고개를 절레절레 흔든다. 물론 아무도 뭐라고 말하진 않는다. 다만 모두가 동시에 한숨을 쉰다.<br><br>"
+        + "— 이 사회에서 가장 무서운 소리는 욕이 아니라 <strong>집단적 침묵</strong>이다.<br><br>"
 
-        + "아이들은 걷기 전에 달리는 법을 먼저 배운다. 넘어질 가능성이 있기 때문이다. 혹시라도 균형을 잃을 것 같으면, 아이는 즉시 보호용 매뉴얼 속으로 회수된다. “실패는 경험이 아니라 결함입니다.”라는 표어가 유치원 벽에 붙어 있다.<br>"
-
-        + "학교에서는 시험 문제가 미리 공개된다. 이유는 간단하다. 틀리면 안 되니까.<br>"
-        + "그래서 모두 만점을 받는다.<br>"
-        + "그리고 아무도 질문하지 않는다. 질문은 *모른다는 사실*을 전제로 하기 때문이다.<br><br>"
+        + "아이들은 걷기 전에 달리는 법을 먼저 배운다. 넘어질 가능성이 있기 때문이다. 혹시라도 균형을 잃을 것 같으면, 아이는 즉시 보호용 매뉴얼 속으로 회수된다. “실패는 경험이 아니라 결함입니다.”라는 표어가 유치원 벽에 붙어 있다.<br><br>"
 
         + "회사에서는 회의가 없다. 회의는 다양한 의견을 낳고, 다양한 의견은 누군가 틀릴 가능성을 만든다. 대신 보고서는 항상 '문제는 없었습니다'로 끝난다. 실제로 문제가 없어서가 아니라, 문제가 있었다고 말한 사람이 더 이상 보이지 않기 때문이다.<br><br>"
 
@@ -364,7 +385,13 @@ const responses = [
     },
 
     {
-        keywords: ["감정", "사라진", "도시", "인기", "장소"],
+        keywords: [
+            { word: "감정", weight: 3 },
+            { word: "사라진", weight: 3 },
+            { word: "도시", weight: 2 },
+            { word: "인기", weight: 2 },
+            { word: "장소", weight: 2 }
+            ],
         answer:
         "감정이 모두 사라진 도시에서 가장 인기 있는 장소는 <strong>민원센터 대기실</strong>이다.<br><br>"
 
@@ -393,7 +420,12 @@ const responses = [
     },
 
     {
-        keywords: ["생각", "그림자", "드러나는", "세계"],
+        keywords: [
+            { word: "생각", weight: 3 },
+            { word: "그림자", weight: 3 },
+            { word: "드러나는", weight: 2 },
+            { word: "세계", weight: 2 }
+            ],
         answer:
         "이 세계에서 사람들은 자신의 생각을 숨길 수 없다.<br>"
 
@@ -425,34 +457,28 @@ const responses = [
         + "<strong>4. 교육</strong><br>"
 
         + "아이들은 어릴 때부터 자신의 그림자를 읽는 법을 배운다.<br>"
-
         + "<span class='bullet'>• <strong>“왜 이런 모양이 나왔을까?”</strong></span>"
         + "<span class='bullet'>• <strong>“이 생각은 계속 가져도 괜찮을까?”</strong></span>"
-
         + "학교에는 <strong>그림자 휴식 시간</strong>이 있다. 아이들은 조용히 앉아 그림자가 흐려질 때까지 기다린다.<br>"
-
         + "친구의 그림자를 보고 놀리면 안 된다. 도와주는 것이 이 사회의 예의다.<br><br>"
 
         + "<strong>5. 범죄와 처벌</strong><br>"
-
         + "악의적인 생각은 행동 이전에 이미 그림자로 드러난다. 그래서 범죄 예방률은 높다. 하지만 문제가 있다.<br>"
-
         + "<strong>충동적인 분노와 실제로 실행될 의도가 있는 악의는 구분하기 어렵다.</strong><br>"
-
         + "이 사회에서 처벌의 기준은 “무엇을 했는가”보다 <strong>“어떤 생각을 끝까지 붙잡았는가”</strong>에 가깝다.<br><br>"
-
-
         + "사람들은 처음엔 이 세계를 저주했다. 너무 솔직하고, 너무 잔인하다고.<br>"
-
         + "하지만 시간이 지나며 깨닫는다.<br>"
-
         + "그림자는 부담이지만, 동시에 <strong>가장 정직한 자기소개</strong>라는 것을.<br>"
-
-    
     },
 
     {
-        keywords: ["행복", "측정", "단위", "새로", "정의"],
+        keywords: [
+            { word: "행복", weight: 3 },
+            { word: "측정", weight: 3 },
+            { word: "단위", weight: 2 },
+            { word: "새로", weight: 2 },
+            { word: "정의", weight: 2 }
+            ],
         answer:
         "좋아. <strong>행복을 재는 새로운 단위</strong>를 이렇게 정의해볼게.<br><br>"
 
@@ -496,7 +522,14 @@ const responses = [
     },
 
     {
-        keywords: ["미래", "교과서","2020년대", "인간", "설명", "사람"],
+        keywords: [
+            { word: "미래", weight: 3 },
+            { word: "교과서", weight: 3 },
+            { word: "2020년대", weight: 2 },
+            { word: "인간", weight: 2 },
+            { word: "설명", weight: 2 },
+            { word: "사람", weight: 2 }
+            ],
         answer:
         "다음은 <strong>미래 사회 교과서</strong>에 수록된다는 설정으로 작성된 서술문이다.<br><br>"
 
@@ -508,9 +541,9 @@ const responses = [
 
         + "<strong>1. 주된 특징</strong><br>"
         + "2020년대 인간은 <strong>동시에 여러 정체성을 유지</strong>했다.<br>"
-        + "<span class='bullet'>• 현실의 자기</span><br>"
-        + "<span class='bullet'>• 온라인에서 전시되는 자기</span><br>"
-        + "<span class='bullet'>• 타인의 반응을 통해 수정되는 자기</span><br>"
+        + "<span class='bullet'>• 현실의 자기</span>"
+        + "<span class='bullet'>• 온라인에서 전시되는 자기</span>"
+        + "<span class='bullet'>• 타인의 반응을 통해 수정되는 자기</span>"
         + "이 셋은 완전히 일치하지 않았으며, 인간은 그 차이를 <strong>개성</strong>이라 부르면서도 내심 불안을 느꼈다.<br>"
         + "이 시기 인간은 자신을 표현하는 데 익숙했지만, <strong>이해받는 일에는 만성적으로 실패</strong>했다.<br><br>"
 
@@ -518,7 +551,7 @@ const responses = [
         + "2020년대 인간은 감정을 숨기지 않는 세대라고 불렸으나, 실제로는 감정을 <strong>선별적으로 공개</strong>했다.<br>"
         + "기쁨은 게시했고 슬픔은 요약했고 분노는 이론으로 치환했다.<br>"
         + "이로 인해 감정은 점점 경험이 아니라 <strong>콘텐츠</strong>가 되었다.<br>"
-        + "<span class='bullet'>• 행복은 느끼는 것이 아니라 <strong>관리해야 할 상태</strong>로 인식되었고,</span><br>"
+        + "<span class='bullet'>• 행복은 느끼는 것이 아니라 <strong>관리해야 할 상태</strong>로 인식되었고,</span>"
         + "<span class='bullet'>• 불행은 개인의 능력 부족으로 오해되곤 했다.</span><br><br>"
 
         + "<strong>3. 관계 양식</strong><br>"
@@ -536,7 +569,74 @@ const responses = [
         + "“이 시기의 인간은 아직 덜 진화한 존재였던 것이 아니라, <strong>너무 많은 방향으로 동시에 진화하려 했던 종</strong>이었다.”<br>"
         + "2020년대 인간은 불안정했지만 사유했고, 혼란스러웠지만 질문을 멈추지 않았다.<br>"
         + "그래서 이들은 미래 인간의 관점에서 <strong>가장 서툴지만 가장 솔직한 과도기적 조상</strong>으로 기록된다."
+    },
+
+    {
+        keywords: [
+            { word: "아무것도", weight: 3 },
+            { word: "대회", weight: 3 },
+            { word: "규칙", weight: 2 },
+            { word: "우승", weight: 2 },
+            { word: "조건", weight: 2 },
+            ],
+        answer:
+        "좋아! <strong>“아무것도 하지 않기 대회”</strong>의 규칙과 우승 조건을, 진지하면서도 유쾌하게 정리해볼게."
+        + "------------"
+        + "🧘‍♂️ <strong>아무것도 하지 않기 대회</strong><br>"
+        + "최소한의 움직임으로 최고의 침묵을 이루어라!<br><br>"
+        + "🧠 대회 취지<br>"
+        + "이 대회는 <strong>행동하지 않는 것 자체를 예술로 승화시키는 경쟁</strong>이다."
+        + "참가자는 모든 외부 자극을 차단하고, <strong>아무것도 하지 않는 상태</strong>를 유지하는 것이 목표다."
+        + "------------"
+        + "📜 기본 규칙<br><br>"
+        + "<strong>1. 장소와 시간</strong><br>"
+        + "<span class='bullet'>• 모든 경기는 <strong>정해진 객실</strong>에서 진행된다.</span>"
+        + "<span class='bullet'>• 경기 시간은 <strong>30분 / 60분 / 120분</strong> 중 선택 가능 (급이 다름).</span>"
+        + "<span class='bullet'>• 경기 중 이동은 <strong>금지</strong>된다 (화장실 포함).</span>"
+        + "------------"
+        + "<strong>2.준비 자세</strong><br><br>"
+        + "참가자는 다음 상태를 유지해야 한다.<br>"
+        + "<span class='bullet'>✔ 눈 뜨기</span>"
+        + "<span class='bullet'>✔ 의자나 바닥에 앉기 또는 누워 있기</span>"
+        + "<span class='bullet'>✔ 손·발의 불필요한 움직임 금지</span>"
+        + "<span class='bullet'>✔ 시선 고정 (어딘가 한 점)</span><br>"
+        + "------------"
+        + "<strong>3. 금지 행동 목록</strong><br><br>"
+        + "다음 행동이 감지되면 실격이다:<br><br>"
+        + "❌ 말하기 (웅얼거림 포함)<br>"
+        + "❌ 스마트폰/시계 확인<br>"
+        + "❌ 책·음식·물건 만지기<br>"
+        + "❌ 눈 감고 잠 자기<br>"
+        + "❌ 고개 돌리기<br>"
+        + "❌ 생각 소리 내기<br>"
+        + "❌ 숨 참기 (숨 쉬는 소리는 허용되나 과도한 신경 집중 금지)<br>"
+        + "------------"
+        + "<strong>4. 판정 방식</strong><br><br>"
+        + "심판 3명이 각자 다음 요소를 모니터링한다:<br><br>"
+
+        + "📌 <strong>움직임 감지</strong><br>"
+        + "📌 <strong>생각 흔적 레벨</strong> (표정·눈빛·목소리 등 미세 신호)<br>"
+        + "📌 <strong>평온 유지 정도</strong><br><br>"
+        + "이 중 가장 낮은 점수가 최종 판정에 반영된다.<br>"
+        + "------------"
+        + "🏆 우승 조건<br><br>"
+        + "📍 <strong>1. 무동작 점수 (Stillness Score)</strong><br>"
+        + "<span class='bullet'>움직임이 전혀 없는 참가자에게 가산점</span>"
+        + "<span class='bullet'>움직임 감지 0회 = <strong>+50점</strong></span><br>"
+        + "📍 <strong>2. 무표정 지속률 (Neutrality Rate)</strong><br>"
+        + "<span class='bullet'>표정 변화가 적으면 높게 평가</span>"
+        + "<span class='bullet'>미세 움직임까지 감지 → 감점</span><br>"
+        + "📍 <strong>3. 내적 평온 인지 (Calmness Index)</strong><br>"
+        + "<span class='bullet'>심판이 심리적 안정 상태를 평가한다.</span>"
+        + "<span class='bullet'>제3자에게 <strong>아무 반응도 보이지 않을 때</strong> 점수 상승.</span><br>"
+        + "------------"
+        + "🥇 최종 평가<br><br>"
+        + "각 항목 점수를 합산하여 순위를 정한다:<br>"
+        + "<strong>총점 = 무동작 + 무표정 + 내적 평온 + 보너스</strong><br><br>"
+        + "동점일 경우:<br>"
+        + "👉 <strong>가장 긴 시간 동안 “시간이 흐르고 있음을 잊은” 참가자</strong>가 우승.<br><br>"
     }
+
 ];
 
 function formatAnswerWithDivider(text) {
@@ -548,18 +648,29 @@ function formatAnswerWithDivider(text) {
 
 /* 키워드 매칭 함수 */
 function getKeywordAnswer(message) {
-    for (const item of responses) {
-        let matchCount = 0;
-        for (const keyword of item.keywords) {
-            if (message.includes(keyword)) matchCount++;
-        }
-        if (matchCount >= 2) return item.answer;
+  let bestAnswer = null;
+  let highestScore = 0;
+
+  for (const item of responses) {
+    let score = 0;
+
+    for (const keywordObj of item.keywords) {
+      if (message.includes(keywordObj.word)) {
+        score += keywordObj.weight;
+      }
     }
-    return "죄송해요, 무슨 말인지 잘 모르겠어요.";
+
+    if (score > highestScore) {
+      highestScore = score;
+      bestAnswer = item.answer;
+    }
+  }
+
+  return bestAnswer || "죄송해요, 무슨 말인지 잘 모르겠어요.";
 }
 
 /* 메시지 처리 */
-const delayInSeconds = 20;
+const delayInSeconds = 3;
 
 function handleSubmit() {
     const message = userInput.value.trim();
