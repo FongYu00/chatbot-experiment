@@ -150,6 +150,12 @@
      JavaScript
 ================================ -->
 <script>
+    /* =========================
+   SoSci CASE ID 가져오기
+   ========================= */
+const urlParams = new URLSearchParams(window.location.search);
+const socsiCaseId = urlParams.get("case");
+
 const chatDisplay = document.getElementById("chatDisplay");
 const userInput = document.getElementById("userInput");
 
